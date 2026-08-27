@@ -16,7 +16,7 @@ def main(page: ft.Page):
         title=ft.Text("تنبيه هام"),
         content=ft.Text("تم حل مشكلة إغلاق النوافذ بنجاح!"),
         actions=[
-            ft.TextButton("إغلاق", on_click=close_dialog),
+            ft.TextButton(content=ft.Text("إغلاق"), on_click=close_dialog),
         ],
         actions_alignment=ft.MainAxisAlignment.END,
     )
@@ -30,7 +30,7 @@ def main(page: ft.Page):
     # زر في الصفحة الرئيسية لفتح النافذة
     page.add(
         ft.ElevatedButton(
-            text="اضغط لفتح النافذة",
+            content=ft.Text("اضغط لفتح النافذة"),
             on_click=open_dialog
         )
     )
