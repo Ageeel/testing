@@ -1,0 +1,6 @@
+[project]
+name = "my_app_name"   # اسم لاتيني تعريفي (بدون مسافات أو حروف عربية)
+version = "1.0.0"
+
+[tool.flet]
+product = "زينب"
