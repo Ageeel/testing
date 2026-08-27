@@ -72,6 +72,6 @@ jobs:
       with:
         name: app-release-apk
         path: |
-          build/apk/output/*.apk
-          build/sapk/output/*.apk
-          **/output/*.apk
+          build/app/outputs/flutter-apk/*.apk
+          build/app/outputs/apk/release/*.apk
+          **/*.apk
