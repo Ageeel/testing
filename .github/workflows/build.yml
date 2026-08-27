@@ -34,19 +34,20 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        # أو إذا لم يكن لديك ملف requirements.txt، استبدل السطر السابق بـ:
+        # أو إذا كنت لا تستخدم ملف requirements.txt، قم بإلغاء التعليق عن السطر التالي:
         # pip install flet>=0.21.0
 
     - name: Build Android APK with Flet (Non-Interactive)
       run: |
-        export CI="true"
-        flet build apk --verbose
+        # استخدام echo "y" لتجاوز سؤال تثبيت Flutter SDK التفاعلي تلقائياً
+        echo "y" | flet build apk --verbose
 
     - name: Fix App Name in AndroidManifest (Arabic Support)
       run: |
         python -c '
         import glob
-        # البحث عن ملف الـ AndroidManifest الناتج في مجلد البناء المؤقت
+        import re
+
         manifests = glob.glob("**/AndroidManifest.xml", recursive=True)
         updated = False
         for m in manifests:
@@ -54,20 +55,19 @@ jobs:
                 with open(m, "r", encoding="utf-8") as f:
                     content = f.read()
                 
-                # استبدال التسمية الافتراضية بالاسم العربي المطلوب
                 if "android:label=" in content:
-                    import re
-                    # استبدال أي label قديم بالاسم العربي لنادي الأمل
+                    # استبدال اسم التطبيق بالاسم العربي "نادي الأمل"
                     content = re.sub(r"android:label=\"([^\"]+)\"", "android:label=\"نادي الأمل\"", content)
                     with open(m, "w", encoding="utf-8") as f:
                         f.write(content)
-                    print(f"Successfully updated: {m}")
+                    print(f"Successfully updated app name in: {m}")
                     updated = True
+        
         if not updated:
             print("Warning: AndroidManifest.xml not found for modification!")
         '
 
-    - name: Rebuild or Finalize APK (if needed) or Upload Artifact
+    - name: Upload APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-release-apk
