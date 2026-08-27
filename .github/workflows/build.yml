@@ -9,7 +9,6 @@ on:
 
 jobs:
   build:
-  
     runs-on: ubuntu-latest
 
     steps:
@@ -34,18 +33,45 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install flet>=0.21.0
-        # إذا كان لديك ملف متطلبات requirements.txt، يمكنك استخدام هذا السطر بدلاً مما سبق:
-        # pip install -r requirements.txt
+        pip install -r requirements.txt
+        # أو إذا لم يكن لديك ملف requirements.txt، استبدل السطر السابق بـ:
+        # pip install flet>=0.21.0
 
-    - name: Build Android APK with Flet
+    - name: Build Android APK with Flet (Non-Interactive)
       run: |
+        export CI="true"
         flet build apk --verbose
 
-    - name: Upload APK Artifact
+    - name: Fix App Name in AndroidManifest (Arabic Support)
+      run: |
+        python -c '
+        import glob
+        # البحث عن ملف الـ AndroidManifest الناتج في مجلد البناء المؤقت
+        manifests = glob.glob("**/AndroidManifest.xml", recursive=True)
+        updated = False
+        for m in manifests:
+            if "build" in m or ".flet" in m:
+                with open(m, "r", encoding="utf-8") as f:
+                    content = f.read()
+                
+                # استبدال التسمية الافتراضية بالاسم العربي المطلوب
+                if "android:label=" in content:
+                    import re
+                    # استبدال أي label قديم بالاسم العربي لنادي الأمل
+                    content = re.sub(r"android:label=\"([^\"]+)\"", "android:label=\"نادي الأمل\"", content)
+                    with open(m, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    print(f"Successfully updated: {m}")
+                    updated = True
+        if not updated:
+            print("Warning: AndroidManifest.xml not found for modification!")
+        '
+
+    - name: Rebuild or Finalize APK (if needed) or Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: app-release-apk
-        path: build/sapk/output/*.apk 
-        # ملاحظة: مسار المخرجات قد يختلف قليلاً حسب إصدار أدوات البناء، 
-        # إذا وجدته في مجسكر مختلف يمكنك تعديل المسار (مثل build/apk/)
+        path: |
+          build/apk/output/*.apk
+          build/sapk/output/*.apk
+          **/output/*.apk
