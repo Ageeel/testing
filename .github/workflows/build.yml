@@ -1,0 +1,51 @@
+name: Build Flet Android APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Set up Java (JDK 17)
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flet>=0.21.0
+        # إذا كان لديك ملف متطلبات requirements.txt، يمكنك استخدام هذا السطر بدلاً مما سبق:
+        # pip install -r requirements.txt
+
+    - name: Build Android APK with Flet
+      run: |
+        flet build apk --verbose
+
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release-apk
+        path: build/sapk/output/*.apk 
+        # ملاحظة: مسار المخرجات قد يختلف قليلاً حسب إصدار أدوات البناء، 
+        # إذا وجدته في مجسكر مختلف يمكنك تعديل المسار (مثل build/apk/)
